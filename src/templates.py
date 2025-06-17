@@ -1,14 +1,27 @@
 """PR template management for MCP server."""
 
 import os
+import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 
 
 class TemplateManager:
-    def __init__(self, templates_dir: str = "templates"):
-        self.templates_dir = Path(templates_dir)
-        self.templates_dir.mkdir(exist_ok=True)
+    def __init__(self, templates_dir: str = None):
+        if templates_dir is None:
+            # Get the directory where this script is located
+            script_dir = Path(__file__).parent.parent
+            self.templates_dir = script_dir / "templates"
+        else:
+            self.templates_dir = Path(templates_dir)
+        
+        # Only try to create directory if it doesn't exist and we have write permissions
+        if not self.templates_dir.exists():
+            try:
+                self.templates_dir.mkdir(exist_ok=True)
+            except (OSError, PermissionError):
+                # If we can't create it, just use the path as-is
+                pass
     
     def get_all_templates(self) -> Dict[str, Dict]:
         """Get all available PR templates with metadata."""
